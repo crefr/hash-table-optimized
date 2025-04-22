@@ -1,0 +1,4 @@
+Obj/
+hashtable
+perf.data
+cachegrind.out.*
