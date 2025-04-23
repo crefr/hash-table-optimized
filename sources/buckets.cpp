@@ -50,8 +50,10 @@ void bucketDtor(bucket_t * bucket)
     elem_t * cur_elem = bucket->first_elem;
 
     while(cur_elem != NULL){
-        delElem(cur_elem);
-        cur_elem = cur_elem->next;
+        elem_t * old_elem = cur_elem;
+        cur_elem = old_elem->next;
+
+        delElem(old_elem);
     }
 }
 
@@ -78,8 +80,10 @@ void bucketInsert(bucket_t * bucket, const char * name, void * data, size_t data
     assert(name);
     assert(data);
 
-    if (bucketLookup(bucket, name) == NULL)
-        bucketPush(bucket, name, data, data_size);
+    if (bucketLookup(bucket, name) != NULL)
+        return;
+
+    bucketPush(bucket, name, data, data_size);
 }
 
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size)
@@ -91,4 +95,6 @@ static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t
     elem_t * new_elem = newElem(name, data, data_size, bucket->first_elem);
     bucket->first_elem = new_elem;
     bucket->bucket_size++;
+
+    memcpy(new_elem->data, data, data_size);
 }

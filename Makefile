@@ -58,6 +58,12 @@ $(C_OBJS): $(OBJDIR)%.o: $(SRCDIR)%.cpp $(ALLDEPS)
 	mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+test_data: compile_test_data_gen test_data/shakespeare.txt test_data/war-and-peace.txt
+	cd test_data && ./test_data_gen
+
+compile_test_data_gen: test_data/test_data_gen.cpp
+	$(CC) $(CFLAGS) test_data/test_data_gen.cpp -o test_data/test_data_gen
+
 dump:
 	objdump -d -Mintel $(FILENAME) > $(basename $(FILENAME)).disasm
 

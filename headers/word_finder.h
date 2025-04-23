@@ -1,0 +1,6 @@
+#ifndef WORD_FINDER_INCLUDED
+#define WORD_FINDER_INCLUDED
+
+
+
+#endif
