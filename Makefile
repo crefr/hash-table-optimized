@@ -40,9 +40,9 @@ else ifeq ($(BUILD),RELEASE)
 endif
 
 asm_sources =
-c_sources 	= main.cpp hashtable.cpp buckets.cpp hash.cpp
+c_sources 	= main.cpp hashtable.cpp buckets.cpp hash.cpp word_finder.cpp
 
-ALLDEPS = $(HEADDIR)buckets.h $(HEADDIR)hashtable.h $(HEADDIR)hash.h
+ALLDEPS = $(HEADDIR)buckets.h $(HEADDIR)hashtable.h $(HEADDIR)hash.h $(HEADDIR)word_finder.h
 
 ASM_OBJS = $(addprefix $(OBJDIR), $(addsuffix .o, $(basename $(asm_sources))))
 C_OBJS   = $(addprefix $(OBJDIR), $(addsuffix .o, $(basename $(c_sources))))
