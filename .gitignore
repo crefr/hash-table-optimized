@@ -1,6 +1,6 @@
 Obj/
 hashtable
-perf.data
+perf.*
 cachegrind.out.*
 *.disasm
 test_data/data_to_find.txt

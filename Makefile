@@ -29,7 +29,7 @@ CFLAGS_LINUX = -I./$(HEADDIR) -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Wef
 		-Werror=vla -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 # release
-CFLAGS_RELEASE = -I./$(HEADDIR) -O3
+CFLAGS_RELEASE = -DNDEBUG -I./$(HEADDIR) -O3
 
 ifeq ($(BUILD),WIN)
 	CFLAGS = $(CFLAGS_WINDOWS)

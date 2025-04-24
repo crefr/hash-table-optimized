@@ -17,11 +17,10 @@ static char * loadFileToBuffer(const char * file_name, size_t * file_size);
 static char ** divideBufferToStrings(char * buffer, size_t buf_size, size_t * word_count);
 
 
-void loadWordsIntoTable(table_t * hashtab, const char * file_name)
+size_t loadWordsIntoTable(table_t * hashtab, const char * file_name)
 {
     assert(hashtab);
     assert(file_name);
-
 
     size_t file_size = 0;
     char * text_buffer = loadFileToBuffer(file_name, &file_size);
@@ -29,11 +28,14 @@ void loadWordsIntoTable(table_t * hashtab, const char * file_name)
     size_t word_count = 0;
     char ** words = divideBufferToStrings(text_buffer, file_size, &word_count);
 
+    size_t words_loaded = 0;
+
     for (size_t word_index = 0; word_index < word_count; word_index++){
         uint32_t * data_ptr = (uint32_t *)tableLookup(hashtab, words[word_index]);
 
         if (data_ptr == NULL){
             uint32_t start_val = 1;
+            words_loaded++;
             tableInsert(hashtab, words[word_index], &start_val, sizeof(start_val));
         }
         else {
@@ -43,7 +45,37 @@ void loadWordsIntoTable(table_t * hashtab, const char * file_name)
 
     free(words);
     free(text_buffer);
+
+    return words_loaded;
 }
+
+
+void findWordsInTable(table_t * hashtab, const char * file_name)
+{
+    assert(hashtab);
+    assert(file_name);
+
+    size_t file_size = 0;
+    char * text_buffer = loadFileToBuffer(file_name, &file_size);
+
+    size_t word_count = 0;
+    char ** words = divideBufferToStrings(text_buffer, file_size, &word_count);
+
+    size_t success_finds = 0;
+
+    for (size_t word_index = 0; word_index < word_count; word_index++){
+        uint32_t * search_result = (uint32_t *)tableLookup(hashtab, words[word_index]);
+
+        if (search_result != NULL)
+            success_finds++;
+    }
+
+    printf("Successfully found %zu words out of %zu\n", success_finds, word_count);
+
+    free(words);
+    free(text_buffer);
+}
+
 
 static char * loadFileToBuffer(const char * file_name, size_t * file_size)
 {

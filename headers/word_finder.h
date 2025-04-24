@@ -3,6 +3,8 @@
 
 #include "hashtable.h"
 
-void loadWordsIntoTable(table_t * hashtab, const char * file_name);
+size_t loadWordsIntoTable(table_t * hashtab, const char * file_name);
+
+void findWordsInTable(table_t * hashtab, const char * file_name);
 
 #endif
