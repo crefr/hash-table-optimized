@@ -5,7 +5,7 @@ const size_t NAME_MAX_LEN = 64;
 
 /// @brief struct for one element in the table
 typedef struct elem {
-    char name[NAME_MAX_LEN];
+    alignas(16) char name[NAME_MAX_LEN];
 
     void * data;
     size_t data_size;

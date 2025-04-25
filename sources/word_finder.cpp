@@ -50,7 +50,7 @@ size_t loadWordsIntoTable(table_t * hashtab, const char * file_name)
 }
 
 
-void findWordsInTable(table_t * hashtab, const char * file_name)
+void findWordsInTable(table_t * hashtab, const char * file_name, const size_t num_of_cycles)
 {
     assert(hashtab);
     assert(file_name);
@@ -63,11 +63,13 @@ void findWordsInTable(table_t * hashtab, const char * file_name)
 
     size_t success_finds = 0;
 
-    for (size_t word_index = 0; word_index < word_count; word_index++){
-        uint32_t * search_result = (uint32_t *)tableLookup(hashtab, words[word_index]);
+    for (size_t cycle_index = 0; cycle_index < num_of_cycles; cycle_index++){
+        for (size_t word_index = 0; word_index < word_count; word_index++){
+            uint32_t * search_result = (uint32_t *)tableLookup(hashtab, words[word_index]);
 
-        if (search_result != NULL)
-            success_finds++;
+            if (search_result != NULL)
+                success_finds++;
+        }
     }
 
     printf("Successfully found %zu words out of %zu\n", success_finds, word_count);

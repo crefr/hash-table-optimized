@@ -27,7 +27,7 @@ const char *  FIND_FILE_NAME = "data_to_find.txt";
 
 const size_t START_WORD_CAP  = 1024;
 
-const size_t MAX_WORD_LEN = 32;
+const size_t MAX_WORD_LEN = 15;
 
 
 word_list_t wordListCtor(size_t start_cap);

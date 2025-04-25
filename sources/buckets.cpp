@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <immintrin.h>
+#include <stdint.h>
 
 #include "buckets.h"
 
@@ -10,6 +12,28 @@ static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t
 static void delElem(elem_t * elem);
 
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size);
+
+
+//! ONLY FOR STRINGS <= 16 chars and memory must be for 16 chars at str1 and str2
+//! ONLY CHECKS FOR EQUALITY
+//! str1 and str2 MUST BE ALIGNED TO 16
+static inline int strcmp_optimized(const char * str1, const char * str2)
+{
+    assert(str1);
+    assert(str2);
+
+    __m128i str1_xmm = _mm_load_si128 ((__m128i const*) str1);
+    __m128i str2_xmm = _mm_load_si128 ((__m128i const*) str2);
+
+    __m128i cmp_result = _mm_cmpeq_epi8(str1_xmm, str2_xmm);
+
+    uint32_t answer = (uint32_t)_mm_movemask_epi8(cmp_result);
+
+    // now we need to negate younger 16 bits
+    answer ^= 0x0000FFFF;
+
+    return answer;
+}
 
 
 static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t * next)
@@ -64,8 +88,11 @@ void * bucketLookup(bucket_t * bucket, const char * name)
 
     elem_t * cur_elem = bucket->first_elem;
 
+    alignas(sizeof(__m128i)) char aligned_name[sizeof(__m128i)] = "";
+    strncpy(aligned_name, name, sizeof(__m128i));
+
     while (cur_elem != NULL){
-        if (strcmp(name, cur_elem->name) == 0)
+        if (strcmp_optimized(cur_elem->name, aligned_name) == 0)
             return cur_elem->data;
 
         cur_elem = cur_elem->next;

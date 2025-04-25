@@ -1,5 +1,7 @@
 FILENAME = hashtable
 
+FLAME_GRAPH_PATH = ~/FlameGraph/
+
 OBJDIR  = Obj/
 SRCDIR  = sources/
 HEADDIR = headers/
@@ -29,7 +31,7 @@ CFLAGS_LINUX = -I./$(HEADDIR) -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Wef
 		-Werror=vla -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 # release
-CFLAGS_RELEASE = -DNDEBUG -I./$(HEADDIR) -O3
+CFLAGS_RELEASE = -g -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer
 
 ifeq ($(BUILD),WIN)
 	CFLAGS = $(CFLAGS_WINDOWS)
@@ -63,6 +65,10 @@ test_data: compile_test_data_gen test_data/shakespeare.txt test_data/war-and-pea
 
 compile_test_data_gen: test_data/test_data_gen.cpp
 	$(CC) $(CFLAGS) test_data/test_data_gen.cpp -o test_data/test_data_gen
+
+perf:
+	sudo perf record -g --call-graph dwarf -F 11999 ./$(FILENAME)
+	sudo perf script | $(FLAME_GRAPH_PATH)stackcollapse-perf.pl | $(FLAME_GRAPH_PATH)flamegraph.pl > graph.svg
 
 dump:
 	objdump -d -Mintel $(FILENAME) > $(basename $(FILENAME)).disasm
