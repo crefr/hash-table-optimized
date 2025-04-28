@@ -15,5 +15,7 @@ finding lasted 56106.864700 ms
 
 ## strcmp() optimization
 
+SSE optimizations:
+
 Successfully found 95630230 words out of 10000000
 finding lasted 46120.426100 ms

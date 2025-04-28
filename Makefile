@@ -67,7 +67,7 @@ compile_test_data_gen: test_data/test_data_gen.cpp
 	$(CC) $(CFLAGS) test_data/test_data_gen.cpp -o test_data/test_data_gen
 
 perf:
-	sudo perf record -g --call-graph dwarf -F 11999 ./$(FILENAME)
+	sudo perf record -g --call-graph dwarf -F 999 ./$(FILENAME)
 	sudo perf script | $(FLAME_GRAPH_PATH)stackcollapse-perf.pl | $(FLAME_GRAPH_PATH)flamegraph.pl > graph.svg
 
 dump:
