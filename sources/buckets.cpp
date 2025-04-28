@@ -19,6 +19,8 @@ static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t
 //! str1 and str2 MUST BE ALIGNED TO 16
 static inline int strcmp_optimized(const char * str1, const char * str2)
 {
+    // printf("strcmp_optimized is used!!!\n");
+
     assert(str1);
     assert(str2);
 
@@ -43,7 +45,9 @@ static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t
 
     elem_t * new_elem = (elem_t *)calloc(1, sizeof(*new_elem));
 
-    strcpy(new_elem->name, name);
+    strncpy(new_elem->name, name, NAME_MAX_LEN);
+    new_elem->name_len = strlen(name);
+
     new_elem->data = calloc(1, data_size);
     new_elem->data_size = data_size;
     new_elem->next = next;
@@ -88,11 +92,25 @@ void * bucketLookup(bucket_t * bucket, const char * name)
 
     elem_t * cur_elem = bucket->first_elem;
 
+    size_t name_len = strlen(name);
+
+    // we are copying string to aligned in case we are using strcmp_optimized
     alignas(sizeof(__m128i)) char aligned_name[sizeof(__m128i)] = "";
-    strncpy(aligned_name, name, sizeof(__m128i));
+    strncpy(aligned_name, name, sizeof(__m128i) - 1);
+
+    // if (name_len >= 16 )printf("name len = %zu\n", name_len);
 
     while (cur_elem != NULL){
-        if (strcmp_optimized(cur_elem->name, aligned_name) == 0)
+        if (name_len != cur_elem->name_len){
+            cur_elem = cur_elem->next;
+            continue;
+        }
+
+        int strcmp_result = (name_len < sizeof(__m128i)) ?
+            strcmp_optimized(cur_elem->name, aligned_name) :
+            strcmp(cur_elem->name, name);
+
+        if (strcmp_result == 0)
             return cur_elem->data;
 
         cur_elem = cur_elem->next;

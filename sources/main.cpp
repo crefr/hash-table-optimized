@@ -12,7 +12,7 @@ const size_t TABLE_SIZE = 2047;
 const char * const FILE_FOR_STORE_NAME = "test_data/data_to_store.txt";
 const char * const FILE_FOR_FIND_NAME  = "test_data/data_to_find.txt";
 
-const size_t NUM_OF_CYCLES = 2;
+const size_t NUM_OF_CYCLES = 10;
 
 
 #define PRINT_TIME(fmt_str, function)                                                                                    \
@@ -57,7 +57,6 @@ int main(int argc, char ** argv)
 
             scanf(" %s", word_to_find);
         }
-
     }
 
     tableDtor(&table);
