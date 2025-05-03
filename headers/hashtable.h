@@ -2,12 +2,15 @@
 #define HASHTABLE_INCUDED
 
 #include "buckets.h"
+#include "hash.h"
 
 /// @brief table struct
 typedef struct {
     bucket_t * buckets;
     size_t table_size;
 } table_t;
+
+#define calcHash crc32Hash
 
 table_t tableCtor(size_t table_size);
 

@@ -7,6 +7,8 @@
 #include "hashtable.h"
 #include "word_finder.h"
 
+#include "hash.h"
+
 const size_t TABLE_SIZE = 2047;
 
 const char * const FILE_FOR_STORE_NAME = "test_data/data_to_store.txt";

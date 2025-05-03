@@ -58,7 +58,7 @@ void tableInsert(table_t * table, const char * name, void * data, size_t data_si
 
 static size_t getBucketIndex(table_t * table, const char * name)
 {
-    uint32_t hash = MurMur32Hash(name, strlen(name), 0);
+    uint32_t hash = calcHash(name, strlen(name));
     size_t index = hash % table->table_size;
 
     return index;

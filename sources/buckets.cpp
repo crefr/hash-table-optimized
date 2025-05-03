@@ -98,8 +98,6 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     alignas(sizeof(__m128i)) char aligned_name[sizeof(__m128i)] = "";
     strncpy(aligned_name, name, sizeof(__m128i) - 1);
 
-    // if (name_len >= 16 )printf("name len = %zu\n", name_len);
-
     while (cur_elem != NULL){
         if (name_len != cur_elem->name_len){
             cur_elem = cur_elem->next;

@@ -15,7 +15,22 @@ finding lasted 56106.864700 ms
 
 ## strcmp() optimization
 
-SSE optimizations:
+### SSE optimizations:
 
 Successfully found 95630230 words out of 10000000
 finding lasted 46120.426100 ms
+
+### all words support, check for length:
+
+Successfully found 95630230 words out of 10000000
+finding lasted 45449.313700 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 43817.687000 ms
+
+## different hash function (crc32)
+Successfully found 95630230 words out of 10000000
+finding lasted 27232.996300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 30144.921800 ms
