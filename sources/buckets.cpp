@@ -13,6 +13,20 @@ static void delElem(elem_t * elem);
 
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
+#ifdef USING_AVX
+    typedef __m256i mXXXi;
+
+    #define mm_load_siXXX       _mm256_load_si256
+    #define mm_cmpeq_epi8       _mm256_cmpeq_epi8
+    #define mm_movemask_epi8    _mm256_movemask_epi8
+#else
+    typedef __m128i mXXXi;
+
+    #define mm_load_siXXX       _mm_load_si128
+    #define mm_cmpeq_epi8       _mm_cmpeq_epi8
+    #define mm_movemask_epi8    _mm_movemask_epi8
+#endif
+
 
 //! ONLY FOR STRINGS <= 16 chars and memory must be for 16 chars at str1 and str2
 //! ONLY CHECKS FOR EQUALITY
@@ -24,15 +38,20 @@ static inline int strcmp_optimized(const char * str1, const char * str2)
     assert(str1);
     assert(str2);
 
-    __m128i str1_xmm = _mm_load_si128 ((__m128i const*) str1);
-    __m128i str2_xmm = _mm_load_si128 ((__m128i const*) str2);
+    mXXXi str1_xmm = mm_load_siXXX ((mXXXi const*) str1);
+    mXXXi str2_xmm = mm_load_siXXX ((mXXXi const*) str2);
 
-    __m128i cmp_result = _mm_cmpeq_epi8(str1_xmm, str2_xmm);
+    mXXXi cmp_result = mm_cmpeq_epi8(str1_xmm, str2_xmm);
 
-    uint32_t answer = (uint32_t)_mm_movemask_epi8(cmp_result);
+    uint32_t answer = (uint32_t)mm_movemask_epi8(cmp_result);
 
-    // now we need to negate younger 16 bits
+# ifdef USING_AVX
+    // we need to negate it
+    answer = ~answer;
+# else
+    // we need to negate younger 16 bits
     answer ^= 0x0000FFFF;
+# endif
 
     return answer;
 }
@@ -95,8 +114,8 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     size_t name_len = strlen(name);
 
     // we are copying string to aligned in case we are using strcmp_optimized
-    alignas(sizeof(__m128i)) char aligned_name[sizeof(__m128i)] = "";
-    strncpy(aligned_name, name, sizeof(__m128i) - 1);
+    alignas(sizeof(mXXXi)) char aligned_name[sizeof(mXXXi)] = "";
+    strncpy(aligned_name, name, sizeof(mXXXi) - 1);
 
     while (cur_elem != NULL){
         if (name_len != cur_elem->name_len){
@@ -104,7 +123,7 @@ void * bucketLookup(bucket_t * bucket, const char * name)
             continue;
         }
 
-        int strcmp_result = (name_len < sizeof(__m128i)) ?
+        int strcmp_result = (name_len < sizeof(mXXXi)) ?
             strcmp_optimized(cur_elem->name, aligned_name) :
             strcmp(cur_elem->name, name);
 

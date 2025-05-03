@@ -34,3 +34,28 @@ finding lasted 27232.996300 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 30144.921800 ms
+
+
+### inligned
+
+Successfully found 95630230 words out of 10000000
+finding lasted 26482.548000 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 26542.689400 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 26542.172600 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 26769.209800 ms
+
+### avx
+Successfully found 95630230 words out of 10000000
+finding lasted 27277.673300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 27526.831500 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 27651.796700 ms

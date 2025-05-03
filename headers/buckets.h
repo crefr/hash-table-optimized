@@ -1,6 +1,11 @@
 #ifndef BUCKETS_INCLUDED
 #define BUCKETS_INCLUDED
 
+#include <immintrin.h>
+
+// decide if using AVX instead of SSE
+// #define USING_AVX
+
 const size_t NAME_MAX_LEN = 64;
 
 /// @brief struct for one element in the table
