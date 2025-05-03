@@ -69,3 +69,17 @@ finding lasted 24247.744100 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 24248.745600 ms
+
+##### MurMur in these conditions
+Successfully found 95630230 words out of 10000000
+finding lasted 39763.906200 ms
+
+### removed data dependency (cur_elem = cur_elem->next)
+Successfully found 95630230 words out of 10000000
+finding lasted 23883.408300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 23710.844200 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 23728.583800 ms

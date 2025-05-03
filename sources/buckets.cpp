@@ -101,14 +101,16 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     assert(bucket);
     assert(name);
 
-    elem_t * cur_elem = bucket->first_elem;
-
     size_t name_len = strlen(name);
 
     mXXXi aligned_name = mm_set1_epi32(0);
     strncpy((char *)&aligned_name, name, sizeof(mXXXi) - 1);
 
-    while (cur_elem != NULL){
+    elem_t * next_elem = bucket->first_elem;
+    while (next_elem != NULL){
+        elem_t * cur_elem = next_elem;
+        next_elem = cur_elem->next;
+
         if (name_len != cur_elem->name_len){
             cur_elem = cur_elem->next;
             continue;
@@ -121,7 +123,7 @@ void * bucketLookup(bucket_t * bucket, const char * name)
         if (strcmp_result == 0)
             return cur_elem->data;
 
-        cur_elem = cur_elem->next;
+        // cur_elem = cur_elem->next;
     }
 
     return NULL;
