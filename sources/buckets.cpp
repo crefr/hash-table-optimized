@@ -13,35 +13,13 @@ static void delElem(elem_t * elem);
 
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
-#ifdef USING_AVX
-    typedef __m256i mXXXi;
-
-    #define mm_load_siXXX       _mm256_load_si256
-    #define mm_cmpeq_epi8       _mm256_cmpeq_epi8
-    #define mm_movemask_epi8    _mm256_movemask_epi8
-#else
-    typedef __m128i mXXXi;
-
-    #define mm_load_siXXX       _mm_load_si128
-    #define mm_cmpeq_epi8       _mm_cmpeq_epi8
-    #define mm_movemask_epi8    _mm_movemask_epi8
-#endif
-
 
 //! ONLY FOR STRINGS <= 16 chars and memory must be for 16 chars at str1 and str2
 //! ONLY CHECKS FOR EQUALITY
 //! str1 and str2 MUST BE ALIGNED TO 16
-static inline int strcmp_optimized(const char * str1, const char * str2)
+static inline int strcmp_optimized(mXXXi str1, mXXXi str2)
 {
-    // printf("strcmp_optimized is used!!!\n");
-
-    assert(str1);
-    assert(str2);
-
-    mXXXi str1_xmm = mm_load_siXXX ((mXXXi const*) str1);
-    mXXXi str2_xmm = mm_load_siXXX ((mXXXi const*) str2);
-
-    mXXXi cmp_result = mm_cmpeq_epi8(str1_xmm, str2_xmm);
+    mXXXi cmp_result = mm_cmpeq_epi8(str1, str2);
 
     uint32_t answer = (uint32_t)mm_movemask_epi8(cmp_result);
 
@@ -64,8 +42,19 @@ static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t
 
     elem_t * new_elem = (elem_t *)calloc(1, sizeof(*new_elem));
 
-    strncpy(new_elem->name, name, NAME_MAX_LEN);
-    new_elem->name_len = strlen(name);
+    size_t name_len = strlen(name);
+    new_elem->name_len = name_len;
+
+    if (name_len < sizeof(mXXXi)){
+        alignas(sizeof(mXXXi)) char aligned_name[sizeof(mXXXi)] = "";
+        strncpy(aligned_name, name, sizeof(mXXXi) - 1);
+
+        new_elem->short_name = mm_load_siXXX((__m128i *)aligned_name);
+    }
+    else {
+        new_elem->long_name = (char *)calloc(name_len + 1, sizeof(char));
+        strncpy(new_elem->long_name, name, name_len);
+    }
 
     new_elem->data = calloc(1, data_size);
     new_elem->data_size = data_size;
@@ -77,6 +66,9 @@ static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t
 static void delElem(elem_t * elem)
 {
     assert(elem);
+
+    if (elem->name_len >= sizeof(mXXXi))
+        free(elem->long_name);
 
     free(elem->data);
     free(elem);
@@ -113,9 +105,8 @@ void * bucketLookup(bucket_t * bucket, const char * name)
 
     size_t name_len = strlen(name);
 
-    // we are copying string to aligned in case we are using strcmp_optimized
-    alignas(sizeof(mXXXi)) char aligned_name[sizeof(mXXXi)] = "";
-    strncpy(aligned_name, name, sizeof(mXXXi) - 1);
+    mXXXi aligned_name = mm_set1_epi32(0);
+    strncpy((char *)&aligned_name, name, sizeof(mXXXi) - 1);
 
     while (cur_elem != NULL){
         if (name_len != cur_elem->name_len){
@@ -124,8 +115,8 @@ void * bucketLookup(bucket_t * bucket, const char * name)
         }
 
         int strcmp_result = (name_len < sizeof(mXXXi)) ?
-            strcmp_optimized(cur_elem->name, aligned_name) :
-            strcmp(cur_elem->name, name);
+            strcmp_optimized(cur_elem->short_name, aligned_name) :
+            strcmp(cur_elem->long_name, name);
 
         if (strcmp_result == 0)
             return cur_elem->data;

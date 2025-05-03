@@ -59,3 +59,13 @@ finding lasted 27526.831500 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 27651.796700 ms
+
+### __m128i in structure for short names
+Successfully found 95630230 words out of 10000000
+finding lasted 24127.873800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 24247.744100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 24248.745600 ms
