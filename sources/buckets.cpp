@@ -47,9 +47,6 @@ static void newElem(bucket_t * bucket, const char * name, void * data, size_t da
     elem_t * new_elem = &(bucket->elements[bucket->bucket_size]);
     bucket->bucket_size++;
 
-    new_elem->next = bucket->first_elem;
-    bucket->first_elem = new_elem;
-
     size_t name_len = strlen(name);
     new_elem->name_len = name_len;
 
@@ -70,6 +67,7 @@ static void newElem(bucket_t * bucket, const char * name, void * data, size_t da
     memcpy(new_elem->data, data, data_size);
 }
 
+
 static void delElem(elem_t * elem)
 {
     assert(elem);
@@ -88,21 +86,15 @@ void bucketInit(bucket_t * bucket)
 
     bucket->elem_capacity = START_ELEMENTS_IN_BUCKET;
     bucket->elements = (elem_t *)calloc(START_ELEMENTS_IN_BUCKET, sizeof(*(bucket->elements)));
-
-    bucket->first_elem = NULL;
 }
 
 void bucketDtor(bucket_t * bucket)
 {
     assert(bucket);
 
-    elem_t * cur_elem = bucket->first_elem;
+    for (size_t elem_index = 0; elem_index < bucket->bucket_size; elem_index++)
+        delElem(&bucket->elements[elem_index]);
 
-    while(cur_elem != NULL){
-        elem_t * next_elem = cur_elem->next;
-        delElem(cur_elem);
-        cur_elem = next_elem;
-    }
     free(bucket->elements);
 }
 
@@ -110,20 +102,8 @@ static void bucketRealloc(bucket_t * bucket)
 {
     assert(bucket);
 
-    elem_t * old_elem_start = bucket->elements;
-
     bucket->elem_capacity *= 2;
     bucket->elements = (elem_t *)realloc(bucket->elements, sizeof(*(bucket->elements)) * bucket->elem_capacity);
-
-    // recalculating pointers
-    bucket->first_elem = bucket->elements + (bucket->first_elem - old_elem_start);
-
-    elem_t * cur_elem = bucket->first_elem;
-
-    while (cur_elem->next != NULL){
-        cur_elem->next = bucket->elements + (cur_elem->next - old_elem_start);
-        cur_elem = cur_elem->next;
-    }
 }
 
 void * bucketLookup(bucket_t * bucket, const char * name)
@@ -132,30 +112,28 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     assert(name);
 
     size_t name_len = strlen(name);
+    size_t bucket_size = bucket->bucket_size;
 
     if (name_len < sizeof(mXXXi)){
         mXXXi aligned_name = mm_set1_epi32(0);
         memcpy((char *)&aligned_name, name, name_len);
 
-        elem_t * next_elem = bucket->first_elem;
+        elem_t * cur_elem = bucket->elements;
 
-        while (next_elem != NULL){
-            elem_t * cur_elem = next_elem;
-            next_elem = cur_elem->next;
-
+        // bucket->elements is just an array
+        for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
             if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
                 return cur_elem->data;
+
+            cur_elem++;
         }
     }
     else {
-        elem_t * next_elem = bucket->first_elem;
+        elem_t * cur_elem = bucket->elements;
 
-        while (next_elem != NULL){
-            elem_t * cur_elem = next_elem;
-            next_elem = cur_elem->next;
-
+        for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
             if (name_len != cur_elem->name_len){
-                cur_elem = cur_elem->next;
+                cur_elem++;
                 continue;
             }
 

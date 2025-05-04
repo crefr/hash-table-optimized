@@ -34,8 +34,6 @@ typedef struct elem {
 
     void * data;
     size_t data_size;
-
-    struct elem * next;
 } elem_t;
 
 
@@ -43,7 +41,6 @@ typedef struct elem {
 typedef struct {
     size_t elem_capacity;
     elem_t * elements;
-    elem_t * first_elem;
     size_t bucket_size;
 } bucket_t;
 
