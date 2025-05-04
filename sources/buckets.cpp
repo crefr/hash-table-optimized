@@ -117,7 +117,9 @@ static void bucketRealloc(bucket_t * bucket)
 
     // recalculating pointers
     bucket->first_elem = bucket->elements + (bucket->first_elem - old_elem_start);
+
     elem_t * cur_elem = bucket->first_elem;
+
     while (cur_elem->next != NULL){
         cur_elem->next = bucket->elements + (cur_elem->next - old_elem_start);
         cur_elem = cur_elem->next;
@@ -131,27 +133,35 @@ void * bucketLookup(bucket_t * bucket, const char * name)
 
     size_t name_len = strlen(name);
 
-    mXXXi aligned_name = mm_set1_epi32(0);
-    strncpy((char *)&aligned_name, name, sizeof(mXXXi) - 1);
+    if (name_len < sizeof(mXXXi)){
+        mXXXi aligned_name = mm_set1_epi32(0);
+        memcpy((char *)&aligned_name, name, name_len);
 
-    elem_t * next_elem = bucket->first_elem;
-    while (next_elem != NULL){
-        elem_t * cur_elem = next_elem;
-        next_elem = cur_elem->next;
+        elem_t * next_elem = bucket->first_elem;
 
-        if (name_len != cur_elem->name_len){
-            cur_elem = cur_elem->next;
-            continue;
+        while (next_elem != NULL){
+            elem_t * cur_elem = next_elem;
+            next_elem = cur_elem->next;
+
+            if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
+                return cur_elem->data;
         }
+    }
+    else {
+        elem_t * next_elem = bucket->first_elem;
 
-        int strcmp_result = (name_len < sizeof(mXXXi)) ?
-            strcmp_optimized(cur_elem->short_name, aligned_name) :
-            strcmp(cur_elem->long_name, name);
+        while (next_elem != NULL){
+            elem_t * cur_elem = next_elem;
+            next_elem = cur_elem->next;
 
-        if (strcmp_result == 0)
-            return cur_elem->data;
+            if (name_len != cur_elem->name_len){
+                cur_elem = cur_elem->next;
+                continue;
+            }
 
-        // cur_elem = cur_elem->next;
+            if (strcmp(cur_elem->long_name, name) == 0)
+                return cur_elem->data;
+        }
     }
 
     return NULL;

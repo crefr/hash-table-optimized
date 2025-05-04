@@ -105,3 +105,19 @@ finding lasted 12016.170800 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 11955.244300 ms
+
+### cycle optimization (recoding)
+Successfully found 95630230 words out of 10000000
+finding lasted 10444.481000 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 10381.750100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 10446.279000 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 10434.678400 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 10436.669900 ms
