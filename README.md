@@ -83,3 +83,25 @@ finding lasted 23710.844200 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 23728.583800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 23723.620700 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 23780.985500 ms
+
+### improved elements locality in bucket
+Successfully found 95630230 words out of 10000000
+finding lasted 11932.738000 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 11965.033900 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 11994.724800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 12016.170800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 11955.244300 ms

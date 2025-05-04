@@ -7,12 +7,13 @@
 
 #include "buckets.h"
 
-static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t * next);
+static void newElem(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
 static void delElem(elem_t * elem);
 
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
+static void bucketRealloc(bucket_t * bucket);
 
 //! ONLY FOR STRINGS <= 16 chars and memory must be for 16 chars at str1 and str2
 //! ONLY CHECKS FOR EQUALITY
@@ -35,12 +36,19 @@ static inline int strcmp_optimized(mXXXi str1, mXXXi str2)
 }
 
 
-static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t * next)
+static void newElem(bucket_t * bucket, const char * name, void * data, size_t data_size)
 {
     assert(name);
     assert(data);
 
-    elem_t * new_elem = (elem_t *)calloc(1, sizeof(*new_elem));
+    if (bucket->bucket_size == bucket->elem_capacity - 1)
+        bucketRealloc(bucket);
+
+    elem_t * new_elem = &(bucket->elements[bucket->bucket_size]);
+    bucket->bucket_size++;
+
+    new_elem->next = bucket->first_elem;
+    bucket->first_elem = new_elem;
 
     size_t name_len = strlen(name);
     new_elem->name_len = name_len;
@@ -56,11 +64,10 @@ static elem_t * newElem(const char * name, void * data, size_t data_size, elem_t
         strncpy(new_elem->long_name, name, name_len);
     }
 
-    new_elem->data = calloc(1, data_size);
     new_elem->data_size = data_size;
-    new_elem->next = next;
 
-    return new_elem;
+    new_elem->data = calloc(1, data_size);
+    memcpy(new_elem->data, data, data_size);
 }
 
 static void delElem(elem_t * elem)
@@ -71,7 +78,6 @@ static void delElem(elem_t * elem)
         free(elem->long_name);
 
     free(elem->data);
-    free(elem);
 }
 
 void bucketInit(bucket_t * bucket)
@@ -79,6 +85,10 @@ void bucketInit(bucket_t * bucket)
     assert(bucket);
 
     bucket->bucket_size = 0;
+
+    bucket->elem_capacity = START_ELEMENTS_IN_BUCKET;
+    bucket->elements = (elem_t *)calloc(START_ELEMENTS_IN_BUCKET, sizeof(*(bucket->elements)));
+
     bucket->first_elem = NULL;
 }
 
@@ -89,10 +99,28 @@ void bucketDtor(bucket_t * bucket)
     elem_t * cur_elem = bucket->first_elem;
 
     while(cur_elem != NULL){
-        elem_t * old_elem = cur_elem;
-        cur_elem = old_elem->next;
+        elem_t * next_elem = cur_elem->next;
+        delElem(cur_elem);
+        cur_elem = next_elem;
+    }
+    free(bucket->elements);
+}
 
-        delElem(old_elem);
+static void bucketRealloc(bucket_t * bucket)
+{
+    assert(bucket);
+
+    elem_t * old_elem_start = bucket->elements;
+
+    bucket->elem_capacity *= 2;
+    bucket->elements = (elem_t *)realloc(bucket->elements, sizeof(*(bucket->elements)) * bucket->elem_capacity);
+
+    // recalculating pointers
+    bucket->first_elem = bucket->elements + (bucket->first_elem - old_elem_start);
+    elem_t * cur_elem = bucket->first_elem;
+    while (cur_elem->next != NULL){
+        cur_elem->next = bucket->elements + (cur_elem->next - old_elem_start);
+        cur_elem = cur_elem->next;
     }
 }
 
@@ -147,9 +175,5 @@ static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t
     assert(name);
     assert(data);
 
-    elem_t * new_elem = newElem(name, data, data_size, bucket->first_elem);
-    bucket->first_elem = new_elem;
-    bucket->bucket_size++;
-
-    memcpy(new_elem->data, data, data_size);
+    newElem(bucket, name, data, data_size);
 }

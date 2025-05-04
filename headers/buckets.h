@@ -22,8 +22,7 @@
     #define mm_movemask_epi8    _mm_movemask_epi8
 #endif
 
-
-const size_t NAME_MAX_LEN = 64;
+const size_t START_ELEMENTS_IN_BUCKET = 16;
 
 /// @brief struct for one element in the table
 typedef struct elem {
@@ -42,6 +41,8 @@ typedef struct elem {
 
 /// @brief list header
 typedef struct {
+    size_t elem_capacity;
+    elem_t * elements;
     elem_t * first_elem;
     size_t bucket_size;
 } bucket_t;
