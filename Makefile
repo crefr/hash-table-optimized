@@ -33,7 +33,7 @@ CFLAGS_LINUX = -I./$(HEADDIR) -march=native -D _DEBUG -ggdb3 -std=c++17 -O0 -Wal
 # release
 CFLAGS_RELEASE = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3
 
-CFLAGS_PERF    = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer
+CFLAGS_PERF    = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline
 
 ifeq ($(BUILD),WIN)
 	CFLAGS = $(CFLAGS_WINDOWS)
