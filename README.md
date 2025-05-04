@@ -121,3 +121,19 @@ finding lasted 10434.678400 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 10436.669900 ms
+
+### array instead of list
+Successfully found 95630230 words out of 10000000
+finding lasted 5233.872100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5291.568300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5274.041800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5241.296400 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5252.150100 ms

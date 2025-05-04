@@ -33,7 +33,6 @@ typedef struct elem {
     size_t name_len;
 
     void * data;
-    size_t data_size;
 } elem_t;
 
 

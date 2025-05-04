@@ -31,7 +31,9 @@ CFLAGS_LINUX = -I./$(HEADDIR) -march=native -D _DEBUG -ggdb3 -std=c++17 -O0 -Wal
 		-Werror=vla -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 # release
-CFLAGS_RELEASE = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer
+CFLAGS_RELEASE = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3
+
+CFLAGS_PERF    = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer
 
 ifeq ($(BUILD),WIN)
 	CFLAGS = $(CFLAGS_WINDOWS)
@@ -39,6 +41,8 @@ else ifeq ($(BUILD),LINUX)
 	CFLAGS = $(CFLAGS_LINUX)
 else ifeq ($(BUILD),RELEASE)
 	CFLAGS = $(CFLAGS_RELEASE)
+else ifeq ($(BUILD),PERF)
+	CFLAGS = $(CFLAGS_PERF)
 endif
 
 asm_sources =
@@ -67,7 +71,7 @@ compile_test_data_gen: test_data/test_data_gen.cpp
 	$(CC) $(CFLAGS) test_data/test_data_gen.cpp -o test_data/test_data_gen
 
 perf:
-	sudo perf record -g --call-graph dwarf -F 999 ./$(FILENAME) -t
+	sudo perf record -g --call-graph dwarf -F 2500 ./$(FILENAME) -t
 	sudo perf script | $(FLAME_GRAPH_PATH)stackcollapse-perf.pl | $(FLAME_GRAPH_PATH)flamegraph.pl > graph.svg
 
 dump:

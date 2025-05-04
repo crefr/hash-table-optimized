@@ -61,8 +61,6 @@ static void newElem(bucket_t * bucket, const char * name, void * data, size_t da
         strncpy(new_elem->long_name, name, name_len);
     }
 
-    new_elem->data_size = data_size;
-
     new_elem->data = calloc(1, data_size);
     memcpy(new_elem->data, data, data_size);
 }
