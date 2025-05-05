@@ -38,8 +38,9 @@ typedef struct elem {
 
 /// @brief list header
 typedef struct {
-    size_t elem_capacity;
     elem_t * elements;
+
+    size_t elem_capacity;
     size_t bucket_size;
 } bucket_t;
 

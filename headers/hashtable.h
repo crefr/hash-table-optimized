@@ -2,7 +2,7 @@
 #define HASHTABLE_INCUDED
 
 #include "buckets.h"
-#include "hash.h"
+// #include "hash.h"
 
 /// @brief table struct
 typedef struct {
@@ -10,7 +10,9 @@ typedef struct {
     size_t table_size;
 } table_t;
 
-#define calcHash crc32Hash
+// #define calcHash MurMur32Hash
+// #define calcHash crc32Hash
+#define calcHash crc32_optimized
 
 table_t tableCtor(size_t table_size);
 
@@ -19,5 +21,7 @@ void tableDtor(table_t * table);
 void * tableLookup(table_t * table, const char * name);
 
 void tableInsert(table_t * table, const char * name, void * data, size_t data_size);
+
+double tableTestDistribution(table_t * table);
 
 #endif

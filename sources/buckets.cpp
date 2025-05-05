@@ -127,6 +127,7 @@ void * bucketLookup(bucket_t * bucket, const char * name)
         }
     }
     else {
+        // pretty rare scenario
         elem_t * cur_elem = bucket->elements;
 
         for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){

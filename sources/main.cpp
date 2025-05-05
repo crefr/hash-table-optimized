@@ -45,8 +45,11 @@ int main(int argc, char ** argv)
         PRINT_TIME("finding lasted %lf ms\n",
         findWordsInTable(&table, FILE_FOR_FIND_NAME, NUM_OF_CYCLES));
     }
+    else if (argc > 1 && strcmp("-d", argv[1]) == 0){
+        printf("deviation = %lg\n", tableTestDistribution(&table));
+    }
     else {
-        char word_to_find[128] = "";
+        alignas(16) char word_to_find[128] = "";
         scanf(" %s", word_to_find);
 
         while(strcmp(word_to_find, "-q") != 0){

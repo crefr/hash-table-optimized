@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "hashtable.h"
 #include "buckets.h"
@@ -62,4 +63,29 @@ static size_t getBucketIndex(table_t * table, const char * name)
     size_t index = hash % table->table_size;
 
     return index;
+}
+
+double tableTestDistribution(table_t * table)
+{
+    assert(table);
+
+    size_t sum   = 0;
+    size_t sum_2 = 0;
+
+    size_t table_size = table->table_size;
+
+    for (size_t bucket_index = 0; bucket_index < table_size; bucket_index++){
+        size_t size = table->buckets[bucket_index].bucket_size;
+
+        sum   += size;
+        sum_2 += size * size;
+    }
+
+    double mean_val = (double)sum   / table_size;
+    double mean_sq  = (double)sum_2 / table_size;
+
+    double dispersion = mean_sq - mean_val * mean_val;
+    double sigma = sqrt(dispersion);
+
+    return sigma;
 }

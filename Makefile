@@ -45,7 +45,7 @@ else ifeq ($(BUILD),PERF)
 	CFLAGS = $(CFLAGS_PERF)
 endif
 
-asm_sources =
+asm_sources = crc32hash.s
 c_sources 	= main.cpp hashtable.cpp buckets.cpp word_finder.cpp
 
 ALLDEPS = $(HEADDIR)buckets.h $(HEADDIR)hashtable.h $(HEADDIR)hash.h $(HEADDIR)word_finder.h
@@ -56,9 +56,9 @@ C_OBJS   = $(addprefix $(OBJDIR), $(addsuffix .o, $(basename $(c_sources))))
 $(FILENAME): $(ASM_OBJS) $(C_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-# $(ASM_OBJS): $(asm_sources)
-# 	@mkdir -p $(OBJDIR)
-# 	nasm -f elf64 -l $(addsuffix .lst, $(basename $<)) $< -o $@
+$(ASM_OBJS): $(OBJDIR)%.o: $(SRCDIR)%.s
+	mkdir -p $(OBJDIR)
+	nasm -g -f elf64 -l $(addsuffix .lst, $(basename $<)) $< -o $@
 
 $(C_OBJS): $(OBJDIR)%.o: $(SRCDIR)%.cpp $(ALLDEPS)
 	mkdir -p $(OBJDIR)

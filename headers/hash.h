@@ -6,6 +6,10 @@
 #include <stdint.h>
 #include <string.h>
 
+extern "C" {
+    uint32_t crc32_optimized(const void * data, const size_t len);
+}
+
 static uint32_t MurMur32Hash(const void * data, size_t len);
 
 static uint32_t crc32Hash(const void * data, size_t len);
