@@ -104,6 +104,8 @@ static void bucketRealloc(bucket_t * bucket)
     bucket->elements = (elem_t *)realloc(bucket->elements, sizeof(*(bucket->elements)) * bucket->elem_capacity);
 }
 
+
+//!!! name is aligned to sizeof(mXXXi) !!!
 void * bucketLookup(bucket_t * bucket, const char * name)
 {
     assert(bucket);
@@ -113,8 +115,10 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     size_t bucket_size = bucket->bucket_size;
 
     if (name_len < sizeof(mXXXi)){
-        mXXXi aligned_name = mm_set1_epi32(0);
-        memcpy((char *)&aligned_name, name, name_len);
+        // mXXXi aligned_name = mm_set1_epi32(0);
+        // memcpy((char *)&aligned_name, name, name_len);
+
+        mXXXi aligned_name = mm_load_siXXX((mXXXi *)name);
 
         elem_t * cur_elem = bucket->elements;
 

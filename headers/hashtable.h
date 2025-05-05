@@ -15,7 +15,7 @@ typedef struct {
 // #define calcHash crc32_optimized
 #define calcHash crc32_optimized_8byte
 
-const size_t NAME_ALIGNMENT = 8;
+const size_t NAME_ALIGNMENT = 16;
 
 table_t tableCtor(size_t table_size);
 

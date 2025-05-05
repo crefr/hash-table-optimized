@@ -233,3 +233,19 @@ finding lasted 4472.630300 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 4459.023600 ms
+
+### because of alignity we can now optimize bucketLookup
+Successfully found 95630230 words out of 10000000
+finding lasted 3726.230500 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 3768.014600 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 3738.801400 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 3745.613100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 3732.198300 ms
