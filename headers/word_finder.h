@@ -5,6 +5,6 @@
 
 size_t loadWordsIntoTable(table_t * hashtab, const char * file_name);
 
-void findWordsInTable(table_t * hashtab, const char * file_name, const size_t num_of_cycles);
+double findWordsInTable(table_t * hashtab, const char * file_name, const size_t num_of_cycles);
 
 #endif

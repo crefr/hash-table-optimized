@@ -137,3 +137,19 @@ finding lasted 5241.296400 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 5252.150100 ms
+
+## ALIGNING TO 8
+Successfully found 95630230 words out of 10000000
+finding lasted 4928.520100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4937.555400 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4950.207100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4965.682500 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4983.560200 ms

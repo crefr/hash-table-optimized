@@ -11,10 +11,10 @@ typedef struct {
 } table_t;
 
 // #define calcHash MurMur32Hash
-// #define calcHash crc32Hash
-#define calcHash crc32_optimized
+#define calcHash crc32Hash
+// #define calcHash crc32_optimized
 
-const size_t NAME_ALIGNMENT = 16;
+const size_t NAME_ALIGNMENT = 8;
 
 table_t tableCtor(size_t table_size);
 

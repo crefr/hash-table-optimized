@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
     if (argc > 1 && strcmp("-t", argv[1]) == 0){
         printf("started finding...\n");
 
-        PRINT_TIME("finding lasted %lf ms\n",
+        printf("finding lasted %lf ms\n",
         findWordsInTable(&table, FILE_FOR_FIND_NAME, NUM_OF_CYCLES));
     }
     else if (argc > 1 && strcmp("-d", argv[1]) == 0){

@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "hashtable.h"
 #include "word_finder.h"
@@ -75,7 +76,7 @@ size_t loadWordsIntoTable(table_t * hashtab, const char * file_name)
 }
 
 
-void findWordsInTable(table_t * hashtab, const char * file_name, const size_t num_of_cycles)
+double findWordsInTable(table_t * hashtab, const char * file_name, const size_t num_of_cycles)
 {
     assert(hashtab);
     assert(file_name);
@@ -88,6 +89,9 @@ void findWordsInTable(table_t * hashtab, const char * file_name, const size_t nu
 
     size_t success_finds = 0;
 
+    struct timespec find_start = {};
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &find_start);
+
     for (size_t cycle_index = 0; cycle_index < num_of_cycles; cycle_index++){
         for (size_t word_index = 0; word_index < word_count; word_index++){
             uint32_t * search_result = (uint32_t *)tableLookup(hashtab, words[word_index]);
@@ -97,9 +101,16 @@ void findWordsInTable(table_t * hashtab, const char * file_name, const size_t nu
         }
     }
 
+    struct timespec find_end = {};
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &find_end);
+
     printf("Successfully found %zu words out of %zu\n", success_finds, word_count);
 
     wordListDtor(&word_list);
+
+    double find_time = 1000 * (find_end.tv_sec - find_start.tv_sec) + (find_end.tv_nsec - find_start.tv_nsec) / 1e6;
+
+    return find_time;
 }
 
 
@@ -154,7 +165,7 @@ static void wordListAlign(word_list_t * word_list)
     for (size_t word_index = 0; word_index < word_count; word_index++){
         size_t word_len = strlen(words[word_index]) + 1; // with '\0'
 
-        if (aligned_index + word_len + NAME_ALIGNMENT + 1 >= capacity){
+        if (aligned_index * NAME_ALIGNMENT + word_len + NAME_ALIGNMENT + 1 >= capacity){
             aligned_buf = (char *)aligned_realloc(aligned_buf, capacity, capacity * 2, NAME_ALIGNMENT);
             capacity *= 2;
         }
@@ -167,9 +178,10 @@ static void wordListAlign(word_list_t * word_list)
         cur_index += word_len;
         size_t shift = word_len % NAME_ALIGNMENT;
 
-        memset(aligned_buf + cur_index, '\0', NAME_ALIGNMENT - shift);
+        if (shift)
+            memset(aligned_buf + cur_index, '\0', NAME_ALIGNMENT - shift);
 
-        aligned_index += word_len / NAME_ALIGNMENT + (shift) ? 1 : 0;
+        aligned_index += (word_len / NAME_ALIGNMENT) + ((shift) ? 1 : 0);
     }
 
     // translating pointers to pointers (not indexes)
@@ -179,6 +191,10 @@ static void wordListAlign(word_list_t * word_list)
 
     free(word_list->buffer);
     word_list->buffer = aligned_buf;
+
+    // for (size_t word_index = 0; word_index < word_count; word_index++){
+    //     printf("%p : %s\n", words[word_index], words[word_index]);
+    // }
 }
 
 
