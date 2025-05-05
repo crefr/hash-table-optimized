@@ -50,6 +50,7 @@ size_t loadWordsIntoTable(table_t * hashtab, const char * file_name)
     assert(file_name);
 
     word_list_t word_list = wordListCtor(file_name);
+    wordListAlign(&word_list);
 
     char ** words = word_list.words;
 

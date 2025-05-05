@@ -11,8 +11,9 @@ typedef struct {
 } table_t;
 
 // #define calcHash MurMur32Hash
-#define calcHash crc32Hash
+// #define calcHash crc32Hash
 // #define calcHash crc32_optimized
+#define calcHash crc32_optimized_8byte
 
 const size_t NAME_ALIGNMENT = 8;
 

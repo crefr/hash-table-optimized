@@ -153,3 +153,83 @@ finding lasted 4965.682500 ms
 
 Successfully found 95630230 words out of 10000000
 finding lasted 4983.560200 ms
+
+### 1-byte crc32_optimized
+
+```nasm
+crc32_optimized:
+        ; push rbp
+        ; mov rbp, rsp
+
+        xor eax, eax            ; hash = 0
+        dec eax
+
+        mov rcx, rsi
+
+    .hash_loop:
+        crc32 eax, BYTE [rdi]
+        inc rdi
+
+        loop .hash_loop
+
+        xor eax, 0xFFFFFFFF
+
+        ; pop rbp
+ret
+```
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5049.042500 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5005.433800 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4962.294700 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5027.216300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 5034.388200 ms
+
+### 8-byte crc32_optimized_8byte
+
+```nasm
+crc32_optimized_8byte:
+        ; push rbp
+        ; mov rbp, rsp
+
+        add rsi, 7
+        shr rsi, 3              ; divide by 8 rounding upward
+
+        mov eax, 0xFFFFFFFF
+
+        mov rcx, rsi
+
+    .hash_loop:
+        crc32 rax, QWORD [rdi]
+        add rdi, 8
+
+        loop .hash_loop
+
+        xor eax, 0xFFFFFFFF
+
+        ; pop rbp
+ret
+```
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4442.338300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4498.684600 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4433.636100 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4472.630300 ms
+
+Successfully found 95630230 words out of 10000000
+finding lasted 4459.023600 ms
