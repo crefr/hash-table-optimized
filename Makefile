@@ -9,7 +9,7 @@ HEADDIR = headers/
 CC = g++
 BUILD  = RELEASE
 # windows
-CFLAGS_WINDOWS = -march=native -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline						\
+CFLAGS_WINDOWS = -masm=intel -march=native -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline						\
 		-Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default					\
 		-Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy 				\
 		-Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers 	\
@@ -18,7 +18,7 @@ CFLAGS_WINDOWS = -march=native -Wshadow -Winit-self -Wredundant-decls -Wcast-ali
 		-I./$(HEADDIR)
 
 # linux
-CFLAGS_LINUX = -I./$(HEADDIR) -march=native -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations 		\
+CFLAGS_LINUX = -I./$(HEADDIR)  -masm=intel -march=native -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations 		\
 		-Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported 			\
 		-Wconversion -Wctor-dtor-privacy -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security 					\
 		-Wformat-signedness -Wformat=2 -Winline -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual 			\
@@ -31,9 +31,9 @@ CFLAGS_LINUX = -I./$(HEADDIR) -march=native -D _DEBUG -ggdb3 -std=c++17 -O0 -Wal
 		-Werror=vla -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 # release
-CFLAGS_RELEASE = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3
+CFLAGS_RELEASE = -g -masm=intel -march=native -DNDEBUG -I./$(HEADDIR) -O3
 
-CFLAGS_PERF    = -g -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline
+CFLAGS_PERF    = -g -masm=intel -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline
 
 ifeq ($(BUILD),WIN)
 	CFLAGS = $(CFLAGS_WINDOWS)
@@ -48,7 +48,7 @@ endif
 asm_sources = crc32hash.s
 c_sources 	= main.cpp hashtable.cpp buckets.cpp word_finder.cpp
 
-ALLDEPS = $(HEADDIR)buckets.h $(HEADDIR)hashtable.h $(HEADDIR)hash.h $(HEADDIR)word_finder.h
+ALLDEPS = $(HEADDIR)strlen_strcmp_opt.h $(HEADDIR)buckets.h $(HEADDIR)hashtable.h $(HEADDIR)hash.h $(HEADDIR)word_finder.h
 
 ASM_OBJS = $(addprefix $(OBJDIR), $(addsuffix .o, $(basename $(asm_sources))))
 C_OBJS   = $(addprefix $(OBJDIR), $(addsuffix .o, $(basename $(c_sources))))

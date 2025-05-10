@@ -3,6 +3,8 @@
 
 #include <immintrin.h>
 
+#define OPTIMIZED_STRLEN
+
 // decide if using AVX instead of SSE
 // #define USING_AVX
 

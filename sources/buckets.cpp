@@ -5,6 +5,7 @@
 #include <immintrin.h>
 #include <stdint.h>
 
+#include "strlen_strcmp_opt.h"
 #include "buckets.h"
 
 static void newElem(bucket_t * bucket, const char * name, void * data, size_t data_size);
@@ -14,26 +15,6 @@ static void delElem(elem_t * elem);
 static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
 static void bucketRealloc(bucket_t * bucket);
-
-//! ONLY FOR STRINGS <= 16 chars and memory must be for 16 chars at str1 and str2
-//! ONLY CHECKS FOR EQUALITY
-//! str1 and str2 MUST BE ALIGNED TO 16
-static inline int strcmp_optimized(mXXXi str1, mXXXi str2)
-{
-    mXXXi cmp_result = mm_cmpeq_epi8(str1, str2);
-
-    uint32_t answer = (uint32_t)mm_movemask_epi8(cmp_result);
-
-# ifdef USING_AVX
-    // we need to negate it
-    answer = ~answer;
-# else
-    // we need to negate younger 16 bits
-    answer ^= 0x0000FFFF;
-# endif
-
-    return answer;
-}
 
 
 static void newElem(bucket_t * bucket, const char * name, void * data, size_t data_size)
@@ -111,13 +92,15 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     assert(bucket);
     assert(name);
 
+# ifdef OPTIMIZED_STRLEN
+    size_t name_len = strlen_optimized(name);
+# else
     size_t name_len = strlen(name);
+#endif
+
     size_t bucket_size = bucket->bucket_size;
 
     if (name_len < sizeof(mXXXi)){
-        // mXXXi aligned_name = mm_set1_epi32(0);
-        // memcpy((char *)&aligned_name, name, name_len);
-
         mXXXi aligned_name = mm_load_siXXX((mXXXi *)name);
 
         elem_t * cur_elem = bucket->elements;

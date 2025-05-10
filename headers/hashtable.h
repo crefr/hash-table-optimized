@@ -2,7 +2,13 @@
 #define HASHTABLE_INCUDED
 
 #include "buckets.h"
+#include "strlen_strcmp_opt.h"
 // #include "hash.h"
+
+// #define calcHash MurMur32Hash
+// #define calcHash crc32Hash
+// #define calcHash crc32_optimized
+#define calcHash crc32_optimized_8byte
 
 /// @brief table struct
 typedef struct {
@@ -10,10 +16,6 @@ typedef struct {
     size_t table_size;
 } table_t;
 
-// #define calcHash MurMur32Hash
-// #define calcHash crc32Hash
-// #define calcHash crc32_optimized
-#define calcHash crc32_optimized_8byte
 
 const size_t NAME_ALIGNMENT = 16;
 
