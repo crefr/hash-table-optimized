@@ -59,7 +59,12 @@ void tableInsert(table_t * table, const char * name, void * data, size_t data_si
 
 static size_t getBucketIndex(table_t * table, const char * name)
 {
+# ifdef OPTIMIZED_STRLEN
     uint32_t hash = calcHash(name, strlen_optimized(name));
+# else
+    uint32_t hash = calcHash(name, strlen(name));
+# endif
+
     size_t index = hash % table->table_size;
 
     return index;

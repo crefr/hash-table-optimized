@@ -10,3 +10,4 @@ test_data/test_data_gen
 graph.svg
 
 *.lst
+measurements.md

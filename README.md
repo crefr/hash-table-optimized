@@ -1,251 +1,178 @@
-# Optimized hash table
+# Оптимизированная хэш-таблица
 
-Hash table optimized by using 3 methods:
-1. Intrinsics.
-2. Inline assembler
-3. Assembler
+## Что такое хэш-таблица?
+Хэш-таблица — структура данных для эффективного хранения пар **ключ-значение**.
+**Принцип работы**: ключи преобразуются в индексы через хэш-функцию, таким образом определяется номер бакета (bucket), в котором будет происходить линейный поиск.
 
-## First version
+Преимущества такого подхода - быстрые поиск и вставка - **O(1)** (в идеальном случае)
 
-Successfully found 95630230 words out of 10000000
-finding lasted 56106.864700 ms
+---
 
-![v1 list](docs/v1_list.png)
-![v1 graph](docs/v1_graph.svg)
+## Особенности эксперимента
 
-## strcmp() optimization
+**Эксперимент** заключается в оптимизации поиска в хэш-таблице.
 
-### SSE optimizations:
+Одной из ключевой особенностей эксперимента является сильно повышенный **load factor - 15.04**, когда в нормальных условиях он обычно не превышает 1.5. Это сделано в образовательных целях для увеличения возможностей для оптимизации.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 46120.426100 ms
+**Основная цель эксперимента** - добиться улучшения производительности при поиске элементов в таблице, используя, в том числе, 3 метода машинно-зависимых оптимизаций:
+1. Интринсики (intrinsics)
+2. Инлайн ассемблер
+3. Ассемблер (в другом файле)
 
-### all words support, check for length:
+Также в ходе работы были проделаны машинно-независимые оптимизации, связанные, в основном, с увеличением эффективности использования кэша процессора.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 45449.313700 ms
+---
 
-Successfully found 95630230 words out of 10000000
-finding lasted 43817.687000 ms
+### Условия эксперимента
 
-## different hash function (crc32)
-Successfully found 95630230 words out of 10000000
-finding lasted 27232.996300 ms
+#### Данные в таблице
 
-Successfully found 95630230 words out of 10000000
-finding lasted 30144.921800 ms
+В таблицу загружаются слова из файла [`shakespeare.txt`](test_data/shakespeare.txt) (30779 уникальных слов)
 
+#### Данные для поиска
 
-### inligned
+Для данных для поиска генерируется файл, в котором случайным образом выбирается 5 млн. слов из [`shakespeare.txt`](test_data/shakespeare.txt) и 5 млн. слов из [`war-and-peace.txt`](test_data/war-and-peace.txt). То есть суммарный файл состоит из 10 млн. строк
 
-Successfully found 95630230 words out of 10000000
-finding lasted 26482.548000 ms
+#### Поиск
 
-Successfully found 95630230 words out of 10000000
-finding lasted 26542.689400 ms
+Файл для поиска прогоняется десять раз. То есть суммарное количество запросов поиска - 100 млн.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 26542.172600 ms
+---
 
-Successfully found 95630230 words out of 10000000
-finding lasted 26769.209800 ms
+### Метрики производительности
 
-### avx
-Successfully found 95630230 words out of 10000000
-finding lasted 27277.673300 ms
+Параметры компиляции при замере времени:
 
-Successfully found 95630230 words out of 10000000
-finding lasted 27526.831500 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 27651.796700 ms
-
-### __m128i in structure for short names
-Successfully found 95630230 words out of 10000000
-finding lasted 24127.873800 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 24247.744100 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 24248.745600 ms
-
-##### MurMur in these conditions
-Successfully found 95630230 words out of 10000000
-finding lasted 39763.906200 ms
-
-### removed data dependency (cur_elem = cur_elem->next)
-Successfully found 95630230 words out of 10000000
-finding lasted 23883.408300 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 23710.844200 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 23728.583800 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 23723.620700 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 23780.985500 ms
-
-### improved elements locality in bucket
-Successfully found 95630230 words out of 10000000
-finding lasted 11932.738000 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 11965.033900 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 11994.724800 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 12016.170800 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 11955.244300 ms
-
-### cycle optimization (recoding)
-Successfully found 95630230 words out of 10000000
-finding lasted 10444.481000 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 10381.750100 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 10446.279000 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 10434.678400 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 10436.669900 ms
-
-### array instead of list
-Successfully found 95630230 words out of 10000000
-finding lasted 5233.872100 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 5291.568300 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 5274.041800 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 5241.296400 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 5252.150100 ms
-
-## ALIGNING TO 8
-Successfully found 95630230 words out of 10000000
-finding lasted 4928.520100 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 4937.555400 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 4950.207100 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 4965.682500 ms
-
-Successfully found 95630230 words out of 10000000
-finding lasted 4983.560200 ms
-
-### 1-byte crc32_optimized
-
-```nasm
-crc32_optimized:
-        ; push rbp
-        ; mov rbp, rsp
-
-        xor eax, eax            ; hash = 0
-        dec eax
-
-        mov rcx, rsi
-
-    .hash_loop:
-        crc32 eax, BYTE [rdi]
-        inc rdi
-
-        loop .hash_loop
-
-        xor eax, 0xFFFFFFFF
-
-        ; pop rbp
-ret
+```bash
+g++ -g -masm=intel -march=native -DNDEBUG -I./$(HEADDIR) -O3 ...
 ```
 
-Successfully found 95630230 words out of 10000000
-finding lasted 5049.042500 ms
+Для измерения среднего времени 100 млн. запросов поиска использовалась стандартная функция `clock_gettime()` с параметром `CLOCK_PROCESS_CPUTIME_ID`.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 5005.433800 ms
+Для каждого состояния измерения проводились 5 раз. Считалось среднее время и стандартное отклонение.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4962.294700 ms
+---
 
-Successfully found 95630230 words out of 10000000
-finding lasted 5027.216300 ms
+### Профилирование
 
-Successfully found 95630230 words out of 10000000
-finding lasted 5034.388200 ms
+#### Особенности компиляции
+Параметры компиляции при профилировании:
 
-### 8-byte crc32_optimized_8byte
-
-```nasm
-crc32_optimized_8byte:
-        ; push rbp
-        ; mov rbp, rsp
-
-        add rsi, 7
-        shr rsi, 3              ; divide by 8 rounding upward
-
-        mov eax, 0xFFFFFFFF
-
-        mov rcx, rsi
-
-    .hash_loop:
-        crc32 rax, QWORD [rdi]
-        add rdi, 8
-
-        loop .hash_loop
-
-        xor eax, 0xFFFFFFFF
-
-        ; pop rbp
-ret
+```bash
+g++ -g -masm=intel -march=native -DNDEBUG -I./$(HEADDIR) -O3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-inline ...
 ```
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4442.338300 ms
+Параметры `-fno-omit-frame-pointer`, `-fno-optimize-sibling-calls` и `-fno-inline` помогают правильнее строить call tree. На практике они замедляют программу примерно на 10%. Будем считать, что они не сильно влияют на ключевое распределение времени между функциями.
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4498.684600 ms
+#### Способ профилирования
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4433.636100 ms
+Профилирование будем осуществлять с помощью инструмента `perf`. Для наглядности будем строить flame graph при помощи [`FlameGraph`](https://github.com/brendangregg/FlameGraph).
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4472.630300 ms
+Также будем использовать визуализатор [`hotspot`](https://github.com/KDAB/hotspot).
 
-Successfully found 95630230 words out of 10000000
-finding lasted 4459.023600 ms
+---
 
-### because of alignity we can now optimize bucketLookup
-Successfully found 95630230 words out of 10000000
-finding lasted 3726.230500 ms
 
-Successfully found 95630230 words out of 10000000
-finding lasted 3768.014600 ms
+## Базовая версия
+![График производительности](docs/v1_graph.svg)
+*Структура данных: односвязный список*
 
-Successfully found 95630230 words out of 10000000
-finding lasted 3738.801400 ms
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 56106.86 ± 0 мс       | 1.00x                   | 1.00x               |
 
-Successfully found 95630230 words out of 10000000
-finding lasted 3745.613100 ms
+---
 
-Successfully found 95630230 words out of 10000000
-finding lasted 3732.198300 ms
+## Оптимизация strcmp()
+### SSE-векторизация сравнения строк
+![SSE-операции](docs/sse_compare.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 45162.48 ± 2286 мс    | 1.24x                   | 1.24x               |
+
+### Предварительная проверка длины
+![Проверка длины](docs/length_check.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 43817.69 ± 832 мс     | 1.03x                   | 1.28x               |
+
+---
+
+## Смена хэш-функции
+### CRC32 с аппаратным ускорением
+![CRC32 vs MurMur](docs/crc32_graph.svg)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 27232.99 ± 1456 мс    | 1.61x                   | 2.06x               |
+
+### Инлайнинг CRC32
+![Инлайнинг](docs/inline_asm.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 26542.30 ± 143 мс     | 1.03x                   | 2.12x               |
+
+---
+
+## Оптимизация структур данных
+### Улучшение локальности элементов
+![Локальность памяти](docs/cache_locality.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 11955.24 ± 30 мс      | 2.22x                   | 4.69x               |
+
+### Замена списка на массив
+![Массив vs Список](docs/array_vs_list.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 5241.30 ± 25 мс       | 2.28x                   | 10.70x              |
+
+---
+
+## Низкоуровневые оптимизации
+### 8-байтовое выравнивание
+![Выравнивание памяти](docs/memory_alignment.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 4950.21 ± 18 мс       | 1.06x                   | 11.33x              |
+
+### 8-байтовая CRC32
+![8-байтовая обработка](docs/8byte_crc32.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 4442.26 ± 33 мс       | 1.11x                   | 12.63x              |
+
+---
+
+## Финальные улучшения
+### Оптимизация поиска в бакете
+![Быстрый поиск](docs/bucket_search.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 3738.80 ± 18 мс       | 1.19x                   | 15.01x              |
+
+### Векторизация strlen
+![SIMD strlen](docs/simd_strlen.png)
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| 3583.80 ± 14 мс       | 1.04x                   | 15.65x              |
+
+---
+
+## Итоговые результаты
+| Версия                | Время выполнения | Суммарное ускорение |
+|-----------------------|------------------|---------------------|
+| Начальная реализация  | 56106.86 мс      | 1.00x               |
+| После всех оптимизаций | 3583.80 мс       | 15.65x              |
+
+**Общее ускорение: 15.65×**
+**Сокращение времени: 56.1 сек → 3.58 сек**
