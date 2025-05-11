@@ -168,18 +168,18 @@ static inline int strcmp_optimized(__m128i str1, __m128i str2)
 Теперь стало понятно, что наибольшее время в нашем сценарии использования хэш-таблицы занимает функция `bucketLookup()`. Вот самый горячий элемент функции:
 
 ```cpp
-    __m128i aligned_name = _mm_set1_epi32(0);
-    memcpy((char *)&aligned_name, name, name_len);
+__m128i aligned_name = _mm_set1_epi32(0);
+memcpy((char *)&aligned_name, name, name_len);
 
-    elem_t * next_elem = bucket->first_elem;
+elem_t * next_elem = bucket->first_elem;
 
-    while (next_elem != NULL){
-        elem_t * cur_elem = next_elem;
-        next_elem = cur_elem->next;
+while (next_elem != NULL){
+    elem_t * cur_elem = next_elem;
+    next_elem = cur_elem->next;
 
-        if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
-            return cur_elem->data;
-    }
+    if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
+        return cur_elem->data;
+}
 ```
 
 Во время поиска идет последовательное обращение к элементам списка. Попробуем улучшить локальность - теперь элементы будут лежать друг за другом, будем вызывать один `calloc()` сразу на все элементы одного бакета.
@@ -198,18 +198,18 @@ static inline int strcmp_optimized(__m128i str1, __m128i str2)
 Теперь самое горячее место `bucketLookup()` выглядит следующим образом:
 
 ```cpp
-    __m128i aligned_name = _mm_set1_epi32(0);
-    memcpy((char *)&aligned_name, name, name_len);
+__m128i aligned_name = _mm_set1_epi32(0);
+memcpy((char *)&aligned_name, name, name_len);
 
-    elem_t * cur_elem = bucket->elements;
+elem_t * cur_elem = bucket->elements;
 
-    // bucket->elements is just an array
-    for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
-        if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
-            return cur_elem->data;
+// bucket->elements is just an array
+for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
+    if (strcmp_optimized(cur_elem->short_name, aligned_name) == 0)
+        return cur_elem->data;
 
-        cur_elem++;
-    }
+    cur_elem++;
+}
 ```
 
 Благодаря отсутствию необходимости обращаться к памяти за адресом следующего элемента было было получено значительное ускорение.
@@ -253,7 +253,7 @@ static size_t getBucketIndex(table_t * table, const char * name)
 
 ### 1-байтовый CRC32
 
-В x86_64 существует инструкция `crc32`, которую можно использовать для оптимизации хэш-функции. Она существует в нескольких вариациях и позволяет считать хэш как для каждого байта отдельно, так и блоками по 4 и 8 байт.
+В x86_64 существует инструкция `crc32`, которую можно использовать для оптимизации хэш-функции. Она существует в нескольких вариациях и позволяет считать хэш как для каждого байта отдельно, так и блоками по 4 и 8 байт. Чтобы ей воспользоваться, перепишем функцию подсчета хэша на ассемблере.
 
 Для начала напишем версию с 1-байтовой инструкцией `CRC32`:
 
@@ -262,10 +262,8 @@ static size_t getBucketIndex(table_t * table, const char * name)
 ;   rdi = data ptr
 ;   rsi = data len
 crc32_optimized:
-        xor eax, eax            ; hash = 0
-        dec eax
-
-        mov rcx, rsi
+        mov eax, 0xFFFFFFFF     ; hash = 0xFFFFFFFF
+        mov rcx, rsi            ; rcx  = len
 
     .hash_loop:
         crc32 eax, BYTE [rdi]
@@ -286,7 +284,7 @@ ret
 
 ### 8-байтовая CRC32
 
-Попробуем использовать что 8-байтовая версию инструкции `CRC32`.
+Попробуем использовать 8-байтовую версию инструкции `CRC32`.
 
 Но для более легкого внедрения этой инструкции в нашу программу, нам требуется выравнивание данных, кратное 8. Для дальнейших оптимизаций сразу будем использовать выранивание, кратное 16.
 
@@ -300,9 +298,9 @@ crc32_optimized_8byte:
         add rsi, 7
         shr rsi, 3              ; divide by 8 rounding upward
 
-        mov eax, 0xFFFFFFFF
+        mov eax, 0xFFFFFFFF     ; hash = 0xFFFFFFFF
 
-        mov rcx, rsi
+        mov rcx, rsi            ; rcx = len / 8 (round upward)
 
     .hash_loop:
         crc32 rax, QWORD [rdi]
@@ -320,16 +318,85 @@ ret
 |-----------------------|-------------------------|---------------------|
 | 4461.4 ± 33 мс       | 1.12x                   | 12.58x              |
 
+Итого аппаратно-зависимые оптимизации хэш-функции дали ускорение **в 1.17 раза**.
+
 ---
 
-## Финальные улучшения
+## Финальные оптимизации
 ### Оптимизация поиска в бакете
+
+Посмотрим, что еще можно оптимизировать. Несмотря на все старания, **Hotspot** не хочет правильно отображать имя `crc32_optimized_8byte()`, поэтому далее будем смотреть распределение времени функций в **perf report** (с параметром --no-children):
+
+![8-байтовый CRC32: доля времени функций](docs/asm_crc32_8byte.png)
+
+*8-байтовый CRC32: доля времени функций*
+
+Подсчет CRC32 теперь занимает порядка 3.6% времени, но немалую долю занимает `__memmove_avx_unaligned_erms()`. Это часть стандартной функции memcpy, она в данный момент используется в `bucketLookup()`, чтобы скопировать невыровненный ключ в выровненную область памяти для дальнейших операций:
+
+```cpp
+__m128i aligned_name = _mm_set1_epi32(0);
+memcpy(&aligned_name, name, name_len);
+```
+
+Но ведь мы сделали выравнивание 16 для всех ключей, когда оптимизировали хэш-функцию. Получается, что такое копирование излишне. Приведенный фрагмент заменим на:
+
+```cpp
+__m128i aligned_name = _mm_load_si128((__m128i *)name);
+```
+
+Такая оптимизация дала неплохой прирост скорости выполнения:
 
 | Время выполнения      | Относительное ускорение | Суммарное ускорение |
 |-----------------------|-------------------------|---------------------|
 | 3738.80 ± 18 мс       | 1.19x                   | 15.01x              |
 
-### Векторизация strlen
+![Оптимизация поиска: доля времени функций](docs/no_memcpy.png)
+
+*Оптимизация поиска: доля времени функций*
+
+### Оптимизация strlen
+
+Как мы видим, теперь немалую долю (а именно, 9.14%) занимает стандартная функция `strlen()`. По сравнению со стандартной библиотекой у нас есть преимущество - мы знаем, что все строки лежат с выравниванием 16 байт. Это дает нам возможность написать оптимизированную версию strlen, используя инлайн ассемблер:
+
+```cpp
+static inline size_t strlen_optimized(const char * str)
+{
+    const char * cur_char = str;
+
+    asm("pxor xmm0, xmm0 \n\t"  // xmm0 is all zeros
+        : : : "xmm0"
+    );
+
+    uint32_t ending = 0;
+
+    while (! ending){
+        asm("movdqa xmm1, [%[cur_char]] \n\t"
+            "pcmpeqb xmm1, xmm0         \n\t"
+            "pmovmskb %[ending], xmm1   \n\t"
+            // ending`s bit i is 1 if cur_block[i] = 0
+
+            : [ending]   "=r" (ending)
+            : [cur_char] "r" (cur_char)
+            : "xmm1"
+        );
+
+        cur_char += 16;
+    }
+
+    uint32_t shift = 0;
+
+    asm (
+        "bsf %[shift], %[ending] \n\t"
+        : [shift]  "=r" (shift)
+        : [ending] "r"  (ending)
+    );
+    size_t len = (cur_char - str) - 16 + shift;
+
+    return len;
+}
+```
+
+Использование такой функции вместо стандартного `strlen()` также дало прирост производительности:
 
 | Время выполнения      | Относительное ускорение | Суммарное ускорение |
 |-----------------------|-------------------------|---------------------|
@@ -338,10 +405,25 @@ ret
 ---
 
 ## Итоговые результаты
-| Версия                | Время выполнения | Суммарное ускорение |
-|-----------------------|------------------|---------------------|
-| Начальная реализация  | 56106.86 мс      | 1.00x               |
-| После всех оптимизаций | 3583.80 мс       | 15.65x              |
 
-**Общее ускорение: 15.65×**
+После всех оптимизаций распределение времени между функциями и Flame Graph выглядят следующим образом:
+
+![Финал: доли времени функций](docs/strlen_opt.png)
+
+*Финал: доли времени функций*
+
+![Финал: Flame Graph](docs/strlen_opt_graph.svg)
+
+*Финал: Flame Graph*
+
+Полное итоговое ускорение и ускорение только за счет аппаратно-зависимых оптимизаций приведем в таблице:
+
+| Версия                            |  Суммарное ускорение |
+|-----------------------            |----------------------|
+| Начальная реализация              |  1.00x               |
+| Аппаратно-зависимые оптимизации   |  1.51x
+| После всех оптимизаций            |  15.65x              |
+
+**Общее ускорение: 15.65**
+
 **Сокращение времени: 56.1 сек → 3.58 сек**
