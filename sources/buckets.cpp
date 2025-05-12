@@ -7,6 +7,7 @@
 
 #include "strlen_strcmp_opt.h"
 #include "buckets.h"
+#include "hash.h"
 
 static void newElem(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
@@ -150,4 +151,39 @@ static void bucketPush(bucket_t * bucket, const char * name, void * data, size_t
     assert(data);
 
     newElem(bucket, name, data, data_size);
+}
+
+
+int bucketVerify(bucket_t * bucket, size_t bucket_index, size_t table_size)
+{
+    assert(bucket);
+
+    size_t bucket_size = bucket->bucket_size;
+    elem_t * elements  = bucket->elements;
+
+    if (bucket_size >= bucket->elem_capacity){
+        fprintf(stderr, "BUCKET ERROR: size >= capacity!\n");
+
+        return 1;
+    }
+
+    for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
+        const char * name = (elements[elem_index].name_len < sizeof(__m128i)) ?
+            (char *)&(elements[elem_index].short_name):
+            elements[elem_index].long_name;
+
+        size_t name_len = strlen(name);
+
+        uint32_t good_index = calcHash(name, name_len) % table_size;
+
+        if (good_index != bucket_index){
+            fprintf(stderr, "BUCKET ERROR: %s - incorrect bucket!\n"
+                            "\tmust be in bucket %zu but in %zu\n", bucket_index, good_index);
+
+            return 1;
+        }
+    }
+
+    // no errors
+    return 0;
 }

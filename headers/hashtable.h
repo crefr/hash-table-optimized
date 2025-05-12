@@ -5,11 +5,6 @@
 #include "strlen_strcmp_opt.h"
 // #include "hash.h"
 
-// #define calcHash MurMur32Hash
-// #define calcHash crc32Hash
-// #define calcHash crc32_optimized
-#define calcHash crc32_optimized_8byte
-
 /// @brief table struct
 typedef struct {
     bucket_t * buckets;
@@ -28,5 +23,13 @@ void * tableLookup(table_t * table, const char * name);
 void tableInsert(table_t * table, const char * name, void * data, size_t data_size);
 
 double tableTestDistribution(table_t * table);
+
+int tableVerifyFunc(table_t * table);
+
+#ifndef NDEBUG
+    #define tableVerify(table) tableVerifyFunc(table)
+#else
+    #define tableVerify(table)
+#endif
 
 #endif

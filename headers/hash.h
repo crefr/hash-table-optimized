@@ -6,6 +6,11 @@
 #include <stdint.h>
 #include <string.h>
 
+// #define calcHash MurMur32Hash
+// #define calcHash crc32Hash
+// #define calcHash crc32_optimized
+#define calcHash crc32_optimized_8byte
+
 extern "C" {
     uint32_t crc32_optimized(const void * data, const size_t len);
 

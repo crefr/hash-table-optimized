@@ -30,6 +30,8 @@ void tableDtor(table_t * table)
 {
     assert(table);
 
+    assert(tableVerify(table) == 0);
+
     for (size_t bucket_index = 0; bucket_index < table->table_size; bucket_index++)
         bucketDtor(&table->buckets[bucket_index]);
 
@@ -40,6 +42,8 @@ void * tableLookup(table_t * table, const char * name)
 {
     assert(table);
     assert(name);
+
+    assert(tableVerify(table) == 0);
 
     size_t bucket_index = getBucketIndex(table, name);
 
@@ -52,6 +56,8 @@ void tableInsert(table_t * table, const char * name, void * data, size_t data_si
     assert(name);
     assert(data);
 
+    assert(tableVerify(table) == 0);
+
     size_t bucket_index = getBucketIndex(table, name);
 
     bucketInsert(&(table->buckets[bucket_index]), name, data, data_size);
@@ -59,6 +65,11 @@ void tableInsert(table_t * table, const char * name, void * data, size_t data_si
 
 static size_t getBucketIndex(table_t * table, const char * name)
 {
+    assert(table);
+    assert(name);
+
+    assert(tableVerify(table) == 0);
+
 # ifdef OPTIMIZED_STRLEN
     uint32_t hash = calcHash(name, strlen_optimized(name));
 # else
@@ -70,9 +81,26 @@ static size_t getBucketIndex(table_t * table, const char * name)
     return index;
 }
 
+int tableVerifyFunc(table_t * table)
+{
+    assert(table);
+
+    size_t table_size = table->table_size;
+    bucket_t * buckets = table->buckets;
+
+    for (size_t bucket_index = 0; bucket_index < table_size; bucket_index++){
+        if (bucketVerify(buckets + bucket_index, bucket_index, table_size) != 0)
+            return 1;
+    }
+
+    return 0;
+}
+
 double tableTestDistribution(table_t * table)
 {
     assert(table);
+
+    assert(tableVerify(table) == 0);
 
     size_t sum   = 0;
     size_t sum_2 = 0;

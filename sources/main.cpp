@@ -17,18 +17,6 @@ const char * const FILE_FOR_FIND_NAME  = "test_data/data_to_find.txt";
 const size_t NUM_OF_CYCLES = 10;
 
 
-#define PRINT_TIME(fmt_str, function)                                                                                    \
-do {                                                                                                            \
-    struct timespec calc_start = {};                                                                            \
-    struct timespec calc_end = {};                                                                              \
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &calc_start);                                                                \
-    function;                                                                                                   \
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &calc_end);                                                                  \
-    double calc_time = 1000 * (calc_end.tv_sec - calc_start.tv_sec) + (calc_end.tv_nsec - calc_start.tv_nsec) / 1e6;   \
-    printf(fmt_str, calc_time);                                                                              \
-} while(0)
-
-
 int main(int argc, char ** argv)
 {
     table_t table = tableCtor(TABLE_SIZE);

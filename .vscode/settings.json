@@ -12,6 +12,7 @@
         "utility": "cpp",
         "*.tcc": "cpp",
         "unordered_map": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "memory": "cpp"
     }
 }

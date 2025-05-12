@@ -36,4 +36,6 @@ void * bucketLookup(bucket_t * bucket, const char * name);
 
 void bucketInsert(bucket_t * bucket, const char * name, void * data, size_t data_size);
 
+int bucketVerify(bucket_t * bucket, size_t bucket_index, size_t table_size);
+
 #endif
