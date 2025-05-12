@@ -97,7 +97,7 @@ void * bucketLookup(bucket_t * bucket, const char * name)
     size_t name_len = strlen_optimized(name);
 # else
     size_t name_len = strlen(name);
-#endif
+# endif
 
     size_t bucket_size = bucket->bucket_size;
 
