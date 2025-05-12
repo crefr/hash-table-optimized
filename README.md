@@ -294,8 +294,10 @@ for (size_t elem_index = 0; elem_index < bucket_size; elem_index++){
 ```cpp
 static size_t getBucketIndex(table_t * table, const char * name)
 {
+    size_t table_size = table->table_size;
+
     uint32_t hash = crc32Hash(name, strlen(name));
-    size_t index = hash % table->table_size;
+    size_t index = hash % table_size;
 
     return index;
 }
@@ -421,15 +423,15 @@ static inline size_t strlen_optimized(const char * str)
         : : : "xmm0"
     );
 
-    uint32_t ending = 0;
+    uint32_t mask = 0;
 
     while (! ending){
         asm("movdqa xmm1, [%[cur_char]] \n\t"
             "pcmpeqb xmm1, xmm0         \n\t"
-            "pmovmskb %[ending], xmm1   \n\t"
-            // ending`s bit i is 1 if cur_block[i] = 0
+            "pmovmskb %[mask], xmm1   \n\t"
+            // mask`s bit i is 1 if cur_block[i] = 0
 
-            : [ending]   "=r" (ending)
+            : [mask]   "=r" (mask)
             : [cur_char] "r" (cur_char)
             : "xmm1"
         );
@@ -440,9 +442,9 @@ static inline size_t strlen_optimized(const char * str)
     uint32_t shift = 0;
 
     asm (
-        "bsf %[shift], %[ending] \n\t"
+        "bsf %[shift], %[mask] \n\t"
         : [shift]  "=r" (shift)
-        : [ending] "r"  (ending)
+        : [mask] "r"  (mask)
     );
     size_t len = (cur_char - str) - 16 + shift;
 

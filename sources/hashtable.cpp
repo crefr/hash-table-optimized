@@ -70,13 +70,15 @@ static size_t getBucketIndex(table_t * table, const char * name)
 
     assert(tableVerify(table) == 0);
 
+    size_t table_size = table->table_size;
+
 # ifdef OPTIMIZED_STRLEN
     uint32_t hash = calcHash(name, strlen_optimized(name));
 # else
     uint32_t hash = calcHash(name, strlen(name));
 # endif
 
-    size_t index = hash % table->table_size;
+    size_t index = hash % table_size;
 
     return index;
 }
