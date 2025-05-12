@@ -31,11 +31,11 @@ static void newElem(bucket_t * bucket, const char * name, void * data, size_t da
     size_t name_len = strlen(name);
     new_elem->name_len = name_len;
 
-    if (name_len < sizeof(mXXXi)){
-        alignas(sizeof(mXXXi)) char aligned_name[sizeof(mXXXi)] = "";
-        strncpy(aligned_name, name, sizeof(mXXXi) - 1);
+    if (name_len < sizeof(__m128i)){
+        alignas(sizeof(__m128i)) char aligned_name[sizeof(__m128i)] = "";
+        strncpy(aligned_name, name, sizeof(__m128i) - 1);
 
-        new_elem->short_name = mm_load_siXXX((__m128i *)aligned_name);
+        new_elem->short_name = _mm_load_si128((__m128i *)aligned_name);
     }
     else {
         new_elem->long_name = (char *)calloc(name_len + 1, sizeof(char));
@@ -51,7 +51,7 @@ static void delElem(elem_t * elem)
 {
     assert(elem);
 
-    if (elem->name_len >= sizeof(mXXXi))
+    if (elem->name_len >= sizeof(__m128i))
         free(elem->long_name);
 
     free(elem->data);
@@ -86,7 +86,7 @@ static void bucketRealloc(bucket_t * bucket)
 }
 
 
-//!!! name is aligned to sizeof(mXXXi) !!!
+//!!! name is aligned to sizeof(__m128i) !!!
 void * bucketLookup(bucket_t * bucket, const char * name)
 {
     assert(bucket);
@@ -100,8 +100,8 @@ void * bucketLookup(bucket_t * bucket, const char * name)
 
     size_t bucket_size = bucket->bucket_size;
 
-    if (name_len < sizeof(mXXXi)){
-        mXXXi aligned_name = mm_load_siXXX((mXXXi *)name);
+    if (name_len < sizeof(__m128i)){
+        __m128i aligned_name = _mm_load_si128((__m128i *)name);
 
         elem_t * cur_elem = bucket->elements;
 
