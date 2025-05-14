@@ -9,7 +9,7 @@
 
 #include "hash.h"
 
-const size_t TABLE_SIZE = 2047;
+const size_t START_TABLE_SIZE = 2048;
 
 const char * const FILE_FOR_STORE_NAME = "test_data/data_to_store.txt";
 const char * const FILE_FOR_FIND_NAME  = "test_data/data_to_find.txt";
@@ -19,13 +19,13 @@ const size_t NUM_OF_CYCLES = 10;
 
 int main(int argc, char ** argv)
 {
-    table_t table = tableCtor(TABLE_SIZE);
-    printf("table size = %zu\n\n", TABLE_SIZE);
+    table_t table = tableCtor(START_TABLE_SIZE);
+    printf("table size = %zu\n\n", table.table_size);
 
     size_t words_loaded = loadWordsIntoTable(&table, FILE_FOR_STORE_NAME);
     printf("LOADED %zu different words!\n", words_loaded);
 
-    printf("words per bucket = %f\n\n", (float)words_loaded / (float)TABLE_SIZE);
+    printf("words per bucket = %f\n\n", (float)words_loaded / (float)table.table_size);
 
     if (argc > 1 && strcmp("-t", argv[1]) == 0){
         printf("started finding...\n");

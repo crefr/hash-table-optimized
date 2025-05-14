@@ -16,7 +16,23 @@ table_t tableCtor(size_t table_size)
 {
     table_t table = {};
 
+    // find first power of 2
+    size_t _1_bits = 0;
+    size_t highest_bit = 0;
+    for (size_t bit_index = 0; bit_index < sizeof(table_size) * 8; bit_index++){
+        if ((table_size & (1UL << bit_index)) != 0){
+            _1_bits++;
+            highest_bit = bit_index;
+        }
+    }
+
+    if (_1_bits > 1){
+        highest_bit++;
+        table_size = (1UL << highest_bit);
+    }
+
     table.table_size = table_size;
+
     table.buckets = (bucket_t *)calloc(table_size, sizeof(*table.buckets));
 
     for (size_t bucket_index = 0; bucket_index < table_size; bucket_index++) {
@@ -70,7 +86,8 @@ static size_t getBucketIndex(table_t * table, const char * name)
 
     assert(tableVerify(table) == 0);
 
-    size_t table_size = table->table_size;
+    // table_size is the power of 2
+    size_t mask = table->table_size - 1;
 
 # ifdef OPTIMIZED_STRLEN
     uint32_t hash = calcHash(name, strlen_optimized(name));
@@ -78,7 +95,7 @@ static size_t getBucketIndex(table_t * table, const char * name)
     uint32_t hash = calcHash(name, strlen(name));
 # endif
 
-    size_t index = hash % table_size;
+    size_t index = hash & mask;
 
     return index;
 }

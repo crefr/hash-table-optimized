@@ -458,17 +458,64 @@ static inline size_t strlen_optimized(const char * str)
 |-----------------------|-------------------------|---------------------|
 | 3590 ± 10 мс          | 1.04x                   | 15.64x              |
 
+![Оптимизация strlen: доли времени функций](docs/strlen_opt.png)
+
+*Оптимизация strlen: доли времени функций*
+
+---
+
+### Оптимизация getBucketIndex()
+
+Кажется, самое время разобраться с функцией `getBucketIndex()`, так как все, что вызывается ею, уже было оптимизировано. Приводим ее код здесь:
+
+```cpp
+static size_t getBucketIndex(table_t * table, const char * name)
+{
+    size_t table_size = table->table_size;
+
+    uint32_t hash = crc32Hash(name, strlen(name));
+    size_t index = hash % table_size;
+
+    return index;
+}
+```
+
+Судя по всему, самое долгое здесь это взятие остатка от деления в общем случае. Команда `div` может занимать довольно много тактов, а здесь она еще и зависимость по данным.
+
+Но ведь можно требовать размер таблицы в виде степени 2 (например, 2048). В этом случае `getBucketIndex()` будет выглядеть следующим образом:
+
+```cpp
+static size_t getBucketIndex(table_t * table, const char * name)
+{
+    // table_size is the power of 2
+    size_t mask = table->table_size - 1;
+
+    uint32_t hash = crc32_optimized_8byte(name, strlen_optimized(name));
+
+    // hash % table->size
+    size_t index = hash & mask;
+
+    return index;
+}
+```
+
+Мы избавились от инструкции `div`, получив немалое ускорение:
+
+| Время выполнения      | Относительное ускорение | Суммарное ускорение |
+|-----------------------|-------------------------|---------------------|
+| ??? ± ?? мс           | ????x                   | ???x                |
+
 ---
 
 ## Итоговые результаты
 
 После всех оптимизаций распределение времени между функциями и Flame Graph выглядят следующим образом:
 
-![Финал: доли времени функций](docs/strlen_opt.png)
+![Финал: доли времени функций](docs/index_opt.png)
 
 *Финал: доли времени функций*
 
-![Финал: Flame Graph](docs/strlen_opt_graph.svg)
+![Финал: Flame Graph](docs/index_opt_graph.svg)
 
 *Финал: Flame Graph*
 
