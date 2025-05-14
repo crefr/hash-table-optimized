@@ -473,7 +473,7 @@ static size_t getBucketIndex(table_t * table, const char * name)
 {
     size_t table_size = table->table_size;
 
-    uint32_t hash = crc32Hash(name, strlen(name));
+    uint32_t hash = crc32_optimized_8byte(name, strlen(name));
     size_t index = hash % table_size;
 
     return index;
@@ -503,7 +503,7 @@ static size_t getBucketIndex(table_t * table, const char * name)
 
 | Время выполнения      | Относительное ускорение | Суммарное ускорение |
 |-----------------------|-------------------------|---------------------|
-| ??? ± ?? мс           | ????x                   | ???x                |
+| 2601 ± 21 мс          | 1.38x                   | 21.58x              |
 
 ---
 
@@ -536,8 +536,8 @@ static size_t getBucketIndex(table_t * table, const char * name)
 |-----------------------            |----------------------|
 | Начальная реализация              |  1.00x               |
 | Аппаратно-зависимые оптимизации   |  1.82x               |
-| **После всех оптимизаций**        | **15.64x**           |
+| **После всех оптимизаций**        | **21.58x**           |
 
-**Общее ускорение: 15.64x**
+**Общее ускорение: 21.58x**
 
-**Сокращение времени: 56.1 сек -> 3.59 сек**
+**Сокращение времени: 56.1 сек -> 2.60 сек**
